@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 
 from ts_benchmark.baselines.srstst.utils.tools import EarlyStopping, adjust_learning_rate
 from ts_benchmark.utils.data_processing import split_before
-from typing import Type, Dict, Optional, Tuple
+from typing import Optional, Tuple
 from torch import optim
 import numpy as np
 import pandas as pd
@@ -19,27 +19,31 @@ from ...models.model_base import ModelBase, BatchMaker
 
 DEFAULT_TRANSFORMER_BASED_HYPER_PARAMS = {
     "enc_in": 1,
-    "e_layers": 2,
+    "e_layers": 1,
+    "hidden_size": 128,
     "d_model": 512,
     "d_ff": 2048,
-    "hidden_size": 256,
-    "n_heads": 8,
+    "n_heads": 2,
     "freq": "h",
     "factor": 1,
     "activation": "gelu",
     "patch_len": 16,
     "stride": 8,
-    "dropout": 0.2,
-    "fc_dropout": 0.2,
+    "dropout": 0.1,
+    "head_dropout": 0.1,
     "batch_size": 256,
-    "lradj": "type3",
-    "lr": 0.02,
+    "lradj": "type1",
+    "lr": 0.0001,
     "num_epochs": 100,
     "num_workers": 0,
-    "loss": "MSE",
-    "patience": 10,
-    "CI": True
+    "loss": "MAE",
+    "patience": 5,
+    "CI": True,
+    "subtract_last": False,
+    "affine": True,
+    "output_attention": 0,
 }
+
 
 class TransformerConfig:
     def __init__(self, **kwargs):
@@ -150,7 +154,7 @@ class SRSTST(ModelBase):
         return test
 
     def _padding_time_stamp_mark(
-        self, time_stamps_list: np.ndarray, padding_len: int
+            self, time_stamps_list: np.ndarray, padding_len: int
     ) -> np.ndarray:
         """
         Padding time stamp mark for prediction.
@@ -174,6 +178,7 @@ class SRSTST(ModelBase):
         )
         padding_mark = get_time_mark(whole_time_stamp, 1, self.config.freq)
         return padding_mark
+
     def validate(self, valid_data_loader, criterion):
         config = self.config
         total_loss = []
@@ -295,14 +300,12 @@ class SRSTST(ModelBase):
                 )
                 # decoder input
 
-                output, loss_importance = self.model(input)
+                output = self.model(input)
 
                 target = target[:, -config.horizon:, :]
                 output = output[:, -config.horizon:, :]
                 loss = criterion(output, target)
-
-                total_loss = loss + loss_importance
-                total_loss.backward()
+                loss.backward()
 
                 optimizer.step()
 
@@ -394,7 +397,7 @@ class SRSTST(ModelBase):
                 )
 
     def batch_forecast(
-        self, horizon: int, batch_maker: BatchMaker, **kwargs
+            self, horizon: int, batch_maker: BatchMaker, **kwargs
     ) -> np.ndarray:
         """
         Make predictions by batch.
@@ -422,8 +425,8 @@ class SRSTST(ModelBase):
 
         input_index = input_data["time_stamps"]
         padding_len = (
-            math.ceil(horizon / self.config.horizon) + 1
-        ) * self.config.horizon
+                              math.ceil(horizon / self.config.horizon) + 1
+                      ) * self.config.horizon
         all_mark = self._padding_time_stamp_mark(input_index, padding_len)
 
         answers = self._perform_rolling_predictions(horizon, input_np, all_mark, device)
@@ -437,11 +440,11 @@ class SRSTST(ModelBase):
         return answers
 
     def _perform_rolling_predictions(
-        self,
-        horizon: int,
-        input_np: np.ndarray,
-        all_mark: np.ndarray,
-        device: torch.device,
+            self,
+            horizon: int,
+            input_np: np.ndarray,
+            all_mark: np.ndarray,
+            device: torch.device,
     ) -> list:
         """
         Perform rolling predictions using the given input data and marks.
@@ -472,14 +475,14 @@ class SRSTST(ModelBase):
                     output.cpu()
                     .numpy()
                     .reshape(real_batch_size, -1, column_num)[
-                        :, -self.config.horizon :, :
+                    :, -self.config.horizon:, :
                     ]
                 )
                 answers.append(answer)
                 if sum(a.shape[1] for a in answers) >= horizon:
                     break
                 rolling_time += 1
-                output = output.cpu().numpy()[:, -self.config.horizon :, :]
+                output = output.cpu().numpy()[:, -self.config.horizon:, :]
                 (
                     input_np,
                     target_np,
@@ -491,11 +494,11 @@ class SRSTST(ModelBase):
         return answers[:, -horizon:, :]
 
     def _get_rolling_data(
-        self,
-        input_np: np.ndarray,
-        output: Optional[np.ndarray],
-        all_mark: np.ndarray,
-        rolling_time: int,
+            self,
+            input_np: np.ndarray,
+            output: Optional[np.ndarray],
+            all_mark: np.ndarray,
+            rolling_time: int,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         Prepare rolling data based on the current rolling time.
@@ -508,7 +511,7 @@ class SRSTST(ModelBase):
         """
         if rolling_time > 0:
             input_np = np.concatenate((input_np, output), axis=1)
-            input_np = input_np[:, -self.config.seq_len :, :]
+            input_np = input_np[:, -self.config.seq_len:, :]
         target_np = np.zeros(
             (
                 input_np.shape[0],
@@ -517,15 +520,15 @@ class SRSTST(ModelBase):
             )
         )
         target_np[:, : self.config.label_len, :] = input_np[
-            :, -self.config.label_len :, :
-        ]
+                                                   :, -self.config.label_len:, :
+                                                   ]
         advance_len = rolling_time * self.config.horizon
-        input_mark_np = all_mark[:, advance_len : self.config.seq_len + advance_len, :]
+        input_mark_np = all_mark[:, advance_len: self.config.seq_len + advance_len, :]
         start = self.config.seq_len - self.config.label_len + advance_len
         end = self.config.seq_len + self.config.horizon + advance_len
         target_mark_np = all_mark[
-            :,
-            start:end,
-            :,
-        ]
+                         :,
+                         start:end,
+                         :,
+                         ]
         return input_np, target_np, input_mark_np, target_mark_np

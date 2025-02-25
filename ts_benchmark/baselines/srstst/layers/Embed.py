@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.nn.utils import weight_norm
 import math
+from einops import rearrange
 
 
 class PositionalEmbedding(nn.Module):
@@ -188,3 +187,65 @@ class PatchEmbedding(nn.Module):
         # Input encoding
         x = self.value_embedding(x) + self.position_embedding(x)
         return self.dropout(x), n_vars
+
+
+class SRS(nn.Module):
+    def __init__(self, d_model, patch_len, stride, seq_len, dropout, hidden_size):
+        super(SRS, self).__init__()
+
+        self.patch_len = patch_len
+        self.stride = stride
+        self.padding = stride
+        self.seq_len = seq_len
+        self.padding_patch_layer = nn.ReplicationPad1d((0, self.padding))
+        self.patch_num = (self.seq_len - self.patch_len + self.stride) // self.stride + 1
+
+        self.scorer = nn.Sequential(nn.Linear(self.patch_len, hidden_size), nn.ReLU(),
+                                    nn.Linear(hidden_size, self.patch_num))
+        # Backbone, Input encoding: projection of feature vectors onto a d-dim vector space
+        self.value_embedding_reg = nn.Linear(patch_len, d_model, bias=False)
+        self.value_embedding_irr = nn.Linear(patch_len, d_model, bias=False)
+        # Positional embedding
+        self.position_embedding = PositionalEmbedding(d_model)
+
+        # Residual dropout
+        self.dropout = nn.Dropout(dropout)
+
+        # weight
+        self.alpha = nn.Parameter(torch.tensor(2.2))
+
+    def forward(self, x):
+        # do patching
+        n_vars = x.shape[1]
+        # padding for the original stride
+        x = self.padding_patch_layer(x)
+
+        # [batch_size, n_vars, seq_len - patch_len + 1, patch_size]
+        x_irregular = x.unfold(dimension=-1, size=self.patch_len, step=1)
+        x_regular = x.unfold(dimension=-1, size=self.patch_len, step=self.stride)
+
+        # [batch_size, n_vars, seq_len - patch_len + 1, patch_num]
+        scores = self.scorer(x_irregular)
+        indices = torch.argmax(scores, dim=-2, keepdim=True)
+        max_scores = torch.gather(input=scores, dim=-2, index=indices)
+        inv = (1 / max_scores).detach()
+
+        # [batch_size, n_vars, patch_num, patch_size]
+        x_irr_indices = indices.repeat(1, 1, self.patch_len, 1).permute(0, 1, 3, 2)
+        selected_patches = torch.gather(input=x_irregular, index=x_irr_indices, dim=-2)
+
+        # [batch_size, n_vars, patch_num, patch_size]
+        selected_patches = (max_scores * inv).permute(0, 1, 3, 2) * selected_patches
+        sequence = torch.argsort(indices, dim=-1).repeat(1, 1, self.patch_len, 1).permute(0, 1, 3, 2)
+
+        seq_patches = torch.gather(input=selected_patches, index=sequence, dim=-2)
+
+        irregular_patches = rearrange(seq_patches, 'b c n p -> (b c) n p')
+
+        regular_patches = rearrange(x_regular, 'b c n p -> (b c) n p')
+
+        weight = torch.sigmoid(self.alpha)
+        embedding = weight * self.value_embedding_reg(regular_patches) + (1 - weight) * self.value_embedding_irr(
+            irregular_patches) + self.position_embedding(regular_patches)
+
+        return self.dropout(embedding), n_vars

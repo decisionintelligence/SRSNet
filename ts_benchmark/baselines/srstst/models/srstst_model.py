@@ -1,10 +1,10 @@
 import torch
 from torch import nn
 
-from ..layers.Embed import PatchEmbedding
-from ..layers.SelfAttention_Family import FullAttention, AttentionLayer
-from ..layers.Transformer_EncDec import Encoder, EncoderLayer
-from ..layers.RevIN import RevIN
+from ts_benchmark.baselines.srstst.layers.Embed import SRS
+from ts_benchmark.baselines.srstst.layers.SelfAttention_Family import FullAttention, AttentionLayer
+from ts_benchmark.baselines.srstst.layers.Transformer_EncDec import Encoder, EncoderLayer
+from ts_benchmark.baselines.srstst.layers.RevIN import RevIN
 
 
 class FlattenHead(nn.Module):
@@ -33,11 +33,10 @@ class SRSTSTModel(nn.Module):
         self.pred_len = config.pred_len
         self.patch_len = config.patch_len
         self.stride = config.stride
-        padding = self.stride
 
-        # patching and embedding
-        self.patch_embedding = PatchEmbedding(
-            config.d_model, self.patch_len, self.stride, padding, config.dropout
+        # selective representation space
+        self.patch_embedding = SRS(
+            config.d_model, self.patch_len, self.stride, self.seq_len, config.dropout, config.hidden_size
         )
 
         # Encoder
@@ -76,7 +75,7 @@ class SRSTSTModel(nn.Module):
         self.revin = RevIN(num_features=config.enc_in, affine=config.affine, subtract_last=config.subtract_last)
 
     def forward(self, x_enc):
-        x_enc = self.revin(x_enc,'norm')
+        x_enc = self.revin(x_enc, 'norm')
         # do patching and embedding
         x_enc = x_enc.permute(0, 2, 1)
         # u: [bs * nvars x patch_num x d_model]
@@ -97,5 +96,5 @@ class SRSTSTModel(nn.Module):
         dec_out = dec_out.permute(0, 2, 1)
 
         # De-Normalization from Non-stationary Transformer
-        dec_out = self.revin(dec_out,'denorm')
+        dec_out = self.revin(dec_out, 'denorm')
         return dec_out
