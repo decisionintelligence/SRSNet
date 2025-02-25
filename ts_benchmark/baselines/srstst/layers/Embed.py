@@ -200,8 +200,11 @@ class SRS(nn.Module):
         self.padding_patch_layer = nn.ReplicationPad1d((0, self.padding))
         self.patch_num = (self.seq_len - self.patch_len + self.stride) // self.stride + 1
 
-        self.scorer = nn.Sequential(nn.Linear(self.patch_len, hidden_size), nn.ReLU(),
+        self.scorer_1 = nn.Sequential(nn.Linear(self.patch_len, hidden_size), nn.ReLU(),
                                     nn.Linear(hidden_size, self.patch_num))
+
+        self.scorer_2 = nn.Sequential(nn.Linear(self.patch_len, hidden_size), nn.ReLU(),
+                                    nn.Linear(hidden_size, 1))
         # Backbone, Input encoding: projection of feature vectors onto a d-dim vector space
         self.value_embedding_reg = nn.Linear(patch_len, d_model, bias=False)
         self.value_embedding_irr = nn.Linear(patch_len, d_model, bias=False)
@@ -225,7 +228,7 @@ class SRS(nn.Module):
         x_regular = x.unfold(dimension=-1, size=self.patch_len, step=self.stride)
 
         # [batch_size, n_vars, seq_len - patch_len + 1, patch_num]
-        scores = self.scorer(x_irregular)
+        scores = self.scorer_1(x_irregular)
         indices = torch.argmax(scores, dim=-2, keepdim=True)
         max_scores = torch.gather(input=scores, dim=-2, index=indices)
         inv = (1 / max_scores).detach()
@@ -236,9 +239,14 @@ class SRS(nn.Module):
 
         # [batch_size, n_vars, patch_num, patch_size]
         selected_patches = (max_scores * inv).permute(0, 1, 3, 2) * selected_patches
-        sequence = torch.argsort(indices, dim=-1).repeat(1, 1, self.patch_len, 1).permute(0, 1, 3, 2)
+        shuffle_scores = self.scorer_2(selected_patches)
+        shuffle_indices = torch.argsort(input=shuffle_scores,dim=-2)
+        shuffled_scores = torch.gather(input=shuffle_scores,index=shuffle_indices,dim=-2)
+        inv = (1/shuffled_scores).detach()
 
-        seq_patches = torch.gather(input=selected_patches, index=sequence, dim=-2)
+        shuffle_patch_indices = shuffle_indices.repeat(1,1,1,self.patch_len)
+        shuffled_patches = torch.gather(input=selected_patches,index=shuffle_patch_indices,dim=-2)
+        seq_patches = shuffled_scores * inv * shuffled_patches
 
         irregular_patches = rearrange(seq_patches, 'b c n p -> (b c) n p')
 
