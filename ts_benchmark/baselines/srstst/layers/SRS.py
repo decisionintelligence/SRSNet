@@ -10,6 +10,7 @@ import torch
 from ts_benchmark.baselines.srstst.layers.Embed import PositionalEmbedding
 from einops import rearrange
 
+
 class SRS(nn.Module):
     def __init__(self, d_model, patch_len, stride, seq_len, dropout, hidden_size):
         super(SRS, self).__init__()
@@ -36,7 +37,7 @@ class SRS(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         # Adaptive weight between Original View and Reconstruction View
-        self.alpha = nn.Parameter(torch.tensor(2.0))
+        self.alpha = nn.Parameter(torch.tensor([2.0] * d_model))
 
     def _origin_view(self, x):
         # [batch_size, n_vars, patch_num, patch_size]
@@ -109,7 +110,7 @@ class SRS(nn.Module):
         original_repr_space = self._origin_view(x)
         # The adaptive weight between the two views
         weight = torch.sigmoid(self.alpha)
-        # [batch_size * n_vars, patch_num, hidden_size]
+        # [batch_size * n_vars, patch_num, d_model]
         embedding = weight * self.value_embedding_org(original_repr_space) \
                     + (1 - weight) * self.value_embedding_rec(rec_repr_space) \
                     + self.position_embedding(original_repr_space)
