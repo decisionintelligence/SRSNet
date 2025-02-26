@@ -18,7 +18,6 @@ from ts_benchmark.baselines.srstst.models.srstst_model import SRSTSTModel
 from ...models.model_base import ModelBase, BatchMaker
 
 DEFAULT_TRANSFORMER_BASED_HYPER_PARAMS = {
-    "enc_in": 1,
     "e_layers": 1,
     "hidden_size": 128,
     "d_model": 512,
@@ -27,12 +26,12 @@ DEFAULT_TRANSFORMER_BASED_HYPER_PARAMS = {
     "freq": "h",
     "factor": 1,
     "activation": "gelu",
-    "patch_len": 16,
-    "stride": 8,
-    "dropout": 0.1,
+    "patch_len": 24,
+    "stride": 24,
+    "dropout": 0.2,
     "head_dropout": 0.1,
     "batch_size": 256,
-    "lradj": "type1",
+    "lradj": "type3",
     "lr": 0.0001,
     "num_epochs": 100,
     "num_workers": 0,
