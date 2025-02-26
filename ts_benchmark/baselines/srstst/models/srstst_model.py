@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from ts_benchmark.baselines.srstst.layers.Embed import SRS
+from ts_benchmark.baselines.srstst.layers.SRS import SRS
 from ts_benchmark.baselines.srstst.layers.SelfAttention_Family import FullAttention, AttentionLayer
 from ts_benchmark.baselines.srstst.layers.Transformer_EncDec import Encoder, EncoderLayer
 from ts_benchmark.baselines.srstst.layers.RevIN import RevIN
