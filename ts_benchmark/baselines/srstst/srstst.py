@@ -17,7 +17,7 @@ from ts_benchmark.baselines.utils import (
 from ts_benchmark.baselines.srstst.models.srstst_model import SRSTSTModel
 from ...models.model_base import ModelBase, BatchMaker
 
-DEFAULT_TRANSFORMER_BASED_HYPER_PARAMS = {
+DEFAULT_HYPER_PARAMS = {
     "e_layers": 1,
     "hidden_size": 128,
     "d_model": 512,
@@ -44,9 +44,9 @@ DEFAULT_TRANSFORMER_BASED_HYPER_PARAMS = {
 }
 
 
-class TransformerConfig:
+class SRSTSTConfig:
     def __init__(self, **kwargs):
-        for key, value in DEFAULT_TRANSFORMER_BASED_HYPER_PARAMS.items():
+        for key, value in DEFAULT_HYPER_PARAMS.items():
             setattr(self, key, value)
 
         for key, value in kwargs.items():
@@ -60,7 +60,7 @@ class TransformerConfig:
 class SRSTST(ModelBase):
     def __init__(self, **kwargs):
         super(SRSTST, self).__init__()
-        self.config = TransformerConfig(**kwargs)
+        self.config = SRSTSTConfig(**kwargs)
         self.scaler = StandardScaler()
         self.seq_len = self.config.seq_len
         self.win_size = self.config.seq_len
