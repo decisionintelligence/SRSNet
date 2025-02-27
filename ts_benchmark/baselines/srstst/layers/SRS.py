@@ -82,7 +82,7 @@ class SRS(nn.Module):
         # [batch_size, n_vars, patch_num, 1]
         shuffle_scores = self.scorer_shuffle(selected_patches)
         # [batch_size, n_vars, patch_num, 1]
-        shuffle_indices = torch.argsort(input=shuffle_scores, dim=-2)
+        shuffle_indices = torch.argsort(input=shuffle_scores, dim=-2, descending=True)
         # [batch_size, n_vars, patch_num, 1]
         shuffled_scores = torch.gather(input=shuffle_scores, index=shuffle_indices, dim=-2)
         non_zero_mask = shuffled_scores != 0
