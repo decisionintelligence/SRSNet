@@ -37,7 +37,8 @@ class SRS(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         # Adaptive weight between Original View and Reconstruction View
-        self.alpha = nn.Parameter(torch.tensor([2.0] * d_model))
+        # self.alpha = nn.Parameter(torch.tensor([2.0] * d_model))
+        self.alpha = nn.Parameter(torch.ones(self.patch_num ,d_model) * 2.0)
 
     def _origin_view(self, x):
         # [batch_size, n_vars, patch_num, patch_size]
