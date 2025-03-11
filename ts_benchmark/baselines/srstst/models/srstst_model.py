@@ -1,3 +1,5 @@
+import math
+
 import torch
 from torch import nn
 
@@ -64,7 +66,7 @@ class SRSTSTModel(nn.Module):
         )
 
         # Prediction Head
-        self.head_nf = config.d_model * int((config.seq_len - self.patch_len) / self.stride + 2)
+        self.head_nf = config.d_model * (math.ceil((config.seq_len - self.patch_len) / self.stride) + 1)
         self.head = FlattenHead(
             config.enc_in,
             self.head_nf,
