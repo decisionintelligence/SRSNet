@@ -35,7 +35,7 @@ DEFAULT_HYPER_PARAMS = {
     "lr": 0.0001,
     "num_epochs": 100,
     "num_workers": 0,
-    "loss": "MAE",
+    "loss": "MSE",
     "patience": 5,
     "CI": True,
     "subtract_last": False,

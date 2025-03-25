@@ -85,7 +85,7 @@ class SRSTSTModel(nn.Module):
 
         # Encoder
         # z: [bs * nvars x patch_num x d_model]
-        enc_out, attns = self.encoder(enc_out)
+        # enc_out, attns = self.encoder(enc_out)
         # z: [bs x nvars x patch_num x d_model]
         enc_out = torch.reshape(
             enc_out, (-1, n_vars, enc_out.shape[-2], enc_out.shape[-1])
