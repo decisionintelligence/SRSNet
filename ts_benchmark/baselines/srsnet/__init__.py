@@ -6,7 +6,7 @@
 * @description: 
 '''
 __all__ = [
-    "SRSTST"
+    "SRSNet"
 ]
 
-from ts_benchmark.baselines.srstst.srstst import SRSTST
+from ts_benchmark.baselines.srsnet.srsnet import SRSNet

@@ -3,10 +3,8 @@ import math
 import torch
 from torch import nn
 
-from ts_benchmark.baselines.srstst.layers.SRS import SRS
-from ts_benchmark.baselines.srstst.layers.SelfAttention_Family import FullAttention, AttentionLayer
-from ts_benchmark.baselines.srstst.layers.Transformer_EncDec import Encoder, EncoderLayer
-from ts_benchmark.baselines.srstst.layers.RevIN import RevIN
+from ts_benchmark.baselines.srsnet.layers.SRS import SRS
+from ts_benchmark.baselines.srsnet.layers.RevIN import RevIN
 
 
 class FlattenHead(nn.Module):
@@ -24,13 +22,13 @@ class FlattenHead(nn.Module):
         return x
 
 
-class SRSTSTModel(nn.Module):
+class SRSNetModel(nn.Module):
     def __init__(self, config):
         """
         patch_len: int, patch len for patch_embedding
         stride: int, stride for patch_embedding
         """
-        super(SRSTSTModel, self).__init__()
+        super(SRSNetModel, self).__init__()
         self.seq_len = config.seq_len
         self.pred_len = config.pred_len
         self.patch_len = config.patch_len
@@ -39,30 +37,6 @@ class SRSTSTModel(nn.Module):
         # selective representation space
         self.patch_embedding = SRS(
             config.d_model, self.patch_len, self.stride, self.seq_len, config.dropout, config.hidden_size
-        )
-
-        # Encoder
-        self.encoder = Encoder(
-            [
-                EncoderLayer(
-                    AttentionLayer(
-                        FullAttention(
-                            False,
-                            config.factor,
-                            attention_dropout=config.dropout,
-                            output_attention=config.output_attention,
-                        ),
-                        config.d_model,
-                        config.n_heads,
-                    ),
-                    config.d_model,
-                    config.d_ff,
-                    dropout=config.dropout,
-                    activation=config.activation,
-                )
-                for _ in range(config.e_layers)
-            ],
-            norm_layer=torch.nn.LayerNorm(config.d_model),
         )
 
         # Prediction Head
@@ -83,9 +57,6 @@ class SRSTSTModel(nn.Module):
         # u: [bs * nvars x patch_num x d_model]
         enc_out, n_vars = self.patch_embedding(x_enc)
 
-        # Encoder
-        # z: [bs * nvars x patch_num x d_model]
-        # enc_out, attns = self.encoder(enc_out)
         # z: [bs x nvars x patch_num x d_model]
         enc_out = torch.reshape(
             enc_out, (-1, n_vars, enc_out.shape[-2], enc_out.shape[-1])

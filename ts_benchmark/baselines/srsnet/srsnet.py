@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from sklearn.preprocessing import StandardScaler
 
-from ts_benchmark.baselines.srstst.utils.tools import EarlyStopping, adjust_learning_rate
+from ts_benchmark.baselines.srsnet.utils.tools import EarlyStopping, adjust_learning_rate
 from ts_benchmark.utils.data_processing import split_before
 from typing import Optional, Tuple
 from torch import optim
@@ -14,7 +14,7 @@ from ts_benchmark.baselines.utils import (
     train_val_split,
     get_time_mark
 )
-from ts_benchmark.baselines.srstst.models.srstst_model import SRSTSTModel
+from ts_benchmark.baselines.srsnet.models.srsnet_model import SRSNetModel
 from ...models.model_base import ModelBase, BatchMaker
 
 DEFAULT_HYPER_PARAMS = {
@@ -67,7 +67,7 @@ class SRSTST(ModelBase):
 
     @property
     def model_name(self):
-        return "SRSTST"
+        return "SRSNet"
 
     @staticmethod
     def required_hyper_params() -> dict:
@@ -219,7 +219,7 @@ class SRSTST(ModelBase):
             train_drop_last = True
             self.multi_forecasting_hyper_param_tune(train_valid_data)
 
-        self.model = SRSTSTModel(self.config)
+        self.model = SRSNetModel(self.config)
 
         print(
             "----------------------------------------------------------",
