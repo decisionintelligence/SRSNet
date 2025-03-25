@@ -18,33 +18,26 @@ from ts_benchmark.baselines.srsnet.models.srsnet_model import SRSNetModel
 from ...models.model_base import ModelBase, BatchMaker
 
 DEFAULT_HYPER_PARAMS = {
-    "e_layers": 1,
     "hidden_size": 128,
     "d_model": 512,
-    "d_ff": 2048,
-    "n_heads": 2,
     "freq": "h",
-    "factor": 1,
-    "activation": "gelu",
     "patch_len": 24,
     "stride": 24,
     "dropout": 0.2,
     "head_dropout": 0.1,
     "batch_size": 256,
-    "lradj": "type3",
+    "lradj": "type1",
     "lr": 0.0001,
     "num_epochs": 100,
     "num_workers": 0,
     "loss": "MSE",
     "patience": 5,
-    "CI": True,
     "subtract_last": False,
     "affine": True,
-    "output_attention": 0,
 }
 
 
-class SRSTSTConfig:
+class SRSNetConfig:
     def __init__(self, **kwargs):
         for key, value in DEFAULT_HYPER_PARAMS.items():
             setattr(self, key, value)
@@ -57,10 +50,10 @@ class SRSTSTConfig:
         return self.horizon
 
 
-class SRSTST(ModelBase):
+class SRSNet(ModelBase):
     def __init__(self, **kwargs):
-        super(SRSTST, self).__init__()
-        self.config = SRSTSTConfig(**kwargs)
+        super(SRSNet, self).__init__()
+        self.config = SRSNetConfig(**kwargs)
         self.scaler = StandardScaler()
         self.seq_len = self.config.seq_len
         self.win_size = self.config.seq_len
