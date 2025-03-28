@@ -34,6 +34,7 @@ DEFAULT_HYPER_PARAMS = {
     "patience": 5,
     "subtract_last": False,
     "affine": True,
+    "head_mode": "linear"
 }
 
 
