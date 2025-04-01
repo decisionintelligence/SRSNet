@@ -33,7 +33,7 @@ class PositionalEmbedding(nn.Module):
 
 
 class SRS(nn.Module):
-    def __init__(self, d_model, patch_len, stride, seq_len, dropout, hidden_size):
+    def __init__(self, d_model, patch_len, stride, seq_len, dropout, hidden_size, alpha):
         super(SRS, self).__init__()
 
         self.patch_len = patch_len
@@ -58,7 +58,7 @@ class SRS(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         # Adaptive weight between Original View and Reconstruction View
-        self.alpha = nn.Parameter(torch.ones(self.patch_num, d_model) * 2.0)
+        self.alpha = nn.Parameter(torch.ones(self.patch_num, d_model) * alpha)
 
     def _origin_view(self, x):
         # [batch_size, n_vars, patch_num, patch_size]
