@@ -2,9 +2,10 @@ import torch
 from torch import nn
 
 from ..layers.Embed import PatchEmbedding
+from ..layers.SRS import SRS
 from ..layers.SelfAttention_Family import FullAttention, AttentionLayer
 from ..layers.Transformer_EncDec import Encoder, EncoderLayer
-
+import math
 
 class FlattenHead(nn.Module):
     def __init__(self, n_vars, nf, target_window, head_dropout=0):
@@ -44,6 +45,9 @@ class PatchTST(nn.Module):
         self.patch_embedding = PatchEmbedding(
             config.d_model, self.patch_len, self.stride, padding, config.dropout
         )
+        self.patch_embedding = SRS(config.d_model, self.patch_len, self.stride, self.seq_len, config.srs_dropout, config.srs_hidden_size, config.srs_alpha)
+
+
 
         # Encoder
         self.encoder = Encoder(
@@ -70,7 +74,9 @@ class PatchTST(nn.Module):
         )
 
         # Prediction Head
-        self.head_nf = config.d_model * int((config.seq_len - self.patch_len) / self.stride + 2)
+        # self.head_nf = config.d_model * int((config.seq_len - self.patch_len) / self.stride + 2)
+        self.head_nf = config.d_model * (math.ceil((self.seq_len - self.patch_len) / self.stride) + 1)
+
         if (
             self.task_name == "long_term_forecast"
             or self.task_name == "short_term_forecast"
