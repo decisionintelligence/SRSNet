@@ -33,7 +33,7 @@ class PositionalEmbedding(nn.Module):
 
 
 class SRS(nn.Module):
-    def __init__(self, d_model, patch_len, stride, seq_len, dropout, hidden_size, alpha):
+    def __init__(self, d_model, patch_len, stride, seq_len, dropout, hidden_size, alpha=2.0, pos=True):
         super(SRS, self).__init__()
 
         self.patch_len = patch_len
@@ -52,7 +52,10 @@ class SRS(nn.Module):
         self.value_embedding_org = nn.Linear(patch_len, d_model, bias=False)
         self.value_embedding_rec = nn.Linear(patch_len, d_model, bias=False)
         # Positional embedding
-        self.position_embedding = PositionalEmbedding(d_model)
+        if pos:
+            self.position_embedding = PositionalEmbedding(d_model)
+
+        self.pos = pos
 
         # Residual dropout
         self.dropout = nn.Dropout(dropout)
@@ -132,9 +135,12 @@ class SRS(nn.Module):
         # The adaptive weight between the two views
         weight = torch.sigmoid(self.alpha)
         # [batch_size * n_vars, patch_num, d_model]
-        # embedding = weight * self.value_embedding_org(original_repr_space) \
-        #             + (1 - weight) * self.value_embedding_rec(rec_repr_space) \
-        #             + self.position_embedding(original_repr_space)
 
-        embedding = self.value_embedding_org(original_repr_space)
+        embedding = weight * self.value_embedding_org(original_repr_space) \
+                    + (1 - weight) * self.value_embedding_rec(rec_repr_space)
+
+        if self.pos:
+            position_embedding = self.position_embedding(original_repr_space)
+            embedding = embedding + position_embedding
+
         return self.dropout(embedding), n_vars

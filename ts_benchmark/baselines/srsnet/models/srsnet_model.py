@@ -39,7 +39,7 @@ class SRSNetModel(nn.Module):
 
         # selective representation space
         self.patch_embedding = SRS(
-            config.d_model, self.patch_len, self.stride, self.seq_len, config.dropout, config.hidden_size, config.alpha
+            config.d_model, self.patch_len, self.stride, self.seq_len, config.dropout, config.hidden_size, config.alpha, config.pos
         )
 
         # Prediction Head

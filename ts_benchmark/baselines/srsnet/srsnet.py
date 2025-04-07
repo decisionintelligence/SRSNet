@@ -36,6 +36,7 @@ DEFAULT_HYPER_PARAMS = {
     "affine": True,
     "head_mode": "linear",
     "alpha": 2.0,
+    "pos": True
 }
 
 
