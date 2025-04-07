@@ -132,8 +132,9 @@ class SRS(nn.Module):
         # The adaptive weight between the two views
         weight = torch.sigmoid(self.alpha)
         # [batch_size * n_vars, patch_num, d_model]
-        embedding = weight * self.value_embedding_org(original_repr_space) \
-                    + (1 - weight) * self.value_embedding_rec(rec_repr_space) \
-                    + self.position_embedding(original_repr_space)
+        # embedding = weight * self.value_embedding_org(original_repr_space) \
+        #             + (1 - weight) * self.value_embedding_rec(rec_repr_space) \
+        #             + self.position_embedding(original_repr_space)
 
+        embedding = self.value_embedding_org(original_repr_space)
         return self.dropout(embedding), n_vars
