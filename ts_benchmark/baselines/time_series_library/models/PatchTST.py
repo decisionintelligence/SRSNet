@@ -45,7 +45,7 @@ class PatchTST(nn.Module):
         self.patch_embedding = PatchEmbedding(
             config.d_model, self.patch_len, self.stride, padding, config.dropout
         )
-        self.patch_embedding = SRS(config.d_model, self.patch_len, self.stride, self.seq_len, config.srs_dropout, config.srs_hidden_size, config.srs_alpha)
+        self.patch_embedding = SRS(config.d_model, self.patch_len, self.stride, self.seq_len, config.srs_dropout, config.srs_hidden_size, config.srs_alpha, config.srs_pos)
 
 
 
