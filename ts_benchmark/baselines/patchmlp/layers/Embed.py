@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 import math
+from einops import rearrange
+
+from .SRS import SRS
 
 
 class PositionalEmbedding(nn.Module):
@@ -12,7 +15,7 @@ class PositionalEmbedding(nn.Module):
 
         position = torch.arange(0, max_len).float().unsqueeze(1)
         div_term = (
-            torch.arange(0, d_model, 2).float() * -(math.log(10000.0) / d_model)
+                torch.arange(0, d_model, 2).float() * -(math.log(10000.0) / d_model)
         ).exp()
 
         pe[:, 0::2] = torch.sin(position * div_term)
@@ -57,7 +60,7 @@ class FixedEmbedding(nn.Module):
 
         position = torch.arange(0, c_in).float().unsqueeze(1)
         div_term = (
-            torch.arange(0, d_model, 2).float() * -(math.log(10000.0) / d_model)
+                torch.arange(0, d_model, 2).float() * -(math.log(10000.0) / d_model)
         ).exp()
 
         w[:, 0::2] = torch.sin(position * div_term)
@@ -131,9 +134,9 @@ class DataEmbedding(nn.Module):
             x = self.value_embedding(x) + self.position_embedding(x)
         else:
             x = (
-                self.value_embedding(x)
-                + self.temporal_embedding(x_mark)
-                + self.position_embedding(x)
+                    self.value_embedding(x)
+                    + self.temporal_embedding(x_mark)
+                    + self.position_embedding(x)
             )
         return self.dropout(x)
 
@@ -202,3 +205,39 @@ class Emb(nn.Module):
         s_x4 = self.EmbLayer_4(x)
         s_out = torch.cat([s_x1, s_x2, s_x3, s_x4], -1)
         return s_out
+
+
+class SRSEmb(nn.Module):
+    def __init__(self, d_model, seq_len, dropout, hidden_size, alpha=2.0, pos=True, patch_len=[48, 24, 12, 6]):
+        super().__init__()
+        patch_step = patch_len
+        self.d_model = d_model // 4
+        self.EmbLayer_1 = SRS(self.d_model, patch_len[0], patch_step[0] // 2, seq_len, dropout, hidden_size, alpha, pos)
+        self.EmbLayer_2 = SRS(self.d_model, patch_len[1], patch_step[1] // 2, seq_len, dropout, hidden_size, alpha, pos)
+        self.EmbLayer_3 = SRS(self.d_model, patch_len[2], patch_step[2] // 2, seq_len, dropout, hidden_size, alpha, pos)
+        self.EmbLayer_4 = SRS(self.d_model, patch_len[3], patch_step[3] // 2, seq_len, dropout, hidden_size, alpha, pos)
+        self.patch_num = [math.ceil((seq_len - patch_len[i]) / (patch_step[i] // 2)) + 1 for i in range(len(patch_len))]
+
+        self.flatten = nn.Flatten(start_dim=-2)
+
+        self.ff_1 = nn.Sequential(
+            nn.Linear(self.d_model * self.patch_num[0], self.d_model),
+        )
+        self.ff_2 = nn.Sequential(
+            nn.Linear(self.d_model * self.patch_num[1], self.d_model),
+        )
+        self.ff_3 = nn.Sequential(
+            nn.Linear(self.d_model * self.patch_num[2], self.d_model),
+        )
+        self.ff_4 = nn.Sequential(
+            nn.Linear(self.d_model * self.patch_num[3], self.d_model),
+        )
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        s_x1 = self.ff_1(self.flatten(self.EmbLayer_1(x)))
+        s_x2 = self.ff_2(self.flatten(self.EmbLayer_2(x)))
+        s_x3 = self.ff_3(self.flatten(self.EmbLayer_3(x)))
+        s_x4 = self.ff_4(self.flatten(self.EmbLayer_4(x)))
+        s_out = torch.cat([s_x1, s_x2, s_x3, s_x4], -1)
+        return rearrange(s_out, '(b c) d -> b c d',b=batch_size)

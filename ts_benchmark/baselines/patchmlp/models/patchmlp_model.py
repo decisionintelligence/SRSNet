@@ -2,9 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from ts_benchmark.baselines.patchmlp.layers.Embed import Emb
-
-
+from ts_benchmark.baselines.patchmlp.layers.Embed import Emb, SRSEmb
 class moving_avg(nn.Module):
     """
     Moving average block to highlight the trend of time series
@@ -51,7 +49,7 @@ class PatchMLPModel(nn.Module):
         self.dropout = configs.dropout
         self.decompsition = series_decomp(13)
         # Embedding
-        self.emb = Emb(configs.seq_len, configs.d_model)
+        self.emb = SRSEmb(configs.d_model,self.seq_len,configs.srs_dropout,configs.srs_hidden_size,configs.srs_alpha,configs.srs_pos)
         self.seasonal_layers = nn.ModuleList(
             [Encoder(configs.d_model, configs.enc_in,configs.dropout) for i in range(configs.e_layers)]
         )

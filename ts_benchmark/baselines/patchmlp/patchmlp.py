@@ -514,7 +514,7 @@ class PatchMLP(ModelBase):
                 )
 
     def batch_forecast(
-        self, horizon: int, batch_maker: BatchMaker, **kwargs
+            self, horizon: int, batch_maker: BatchMaker, **kwargs
     ) -> np.ndarray:
         """
         Make predictions by batch.
@@ -534,22 +534,7 @@ class PatchMLP(ModelBase):
 
         input_data = batch_maker.make_batch(self.config.batch_size, self.config.seq_len)
         input_np = input_data["input"]
-        series_dim = input_np.shape[-1]
 
-        if input_data["covariates"] is None:
-            covariates = {}
-        else:
-            covariates = input_data["covariates"]
-        exog_data = covariates.get("exog")
-        if exog_data is not None:
-            input_np = np.concatenate((input_np, exog_data), axis=2)
-            if (
-                hasattr(self.config, "output_chunk_length")
-                and horizon != self.config.output_chunk_length
-            ):
-                raise ValueError(
-                    f"Error: 'exog' is enabled during training, but horizon ({horizon}) != output_chunk_length ({self.config.output_chunk_length}) during forecast."
-                )
         if self.config.norm:
             origin_shape = input_np.shape
             flattened_data = input_np.reshape((-1, input_np.shape[-1]))
@@ -557,8 +542,8 @@ class PatchMLP(ModelBase):
 
         input_index = input_data["time_stamps"]
         padding_len = (
-            math.ceil(horizon / self.config.horizon) + 1
-        ) * self.config.horizon
+                              math.ceil(horizon / self.config.horizon) + 1
+                      ) * self.config.horizon
         all_mark = self._padding_time_stamp_mark(input_index, padding_len)
 
         answers = self._perform_rolling_predictions(horizon, input_np, all_mark, device)
@@ -569,7 +554,7 @@ class PatchMLP(ModelBase):
                 answers.shape
             )
 
-        return answers[..., :series_dim]
+        return answers
 
     def _perform_rolling_predictions(
         self,
