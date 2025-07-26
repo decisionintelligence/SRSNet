@@ -3,7 +3,9 @@ import torch.nn as nn
 import math
 
 from ..layers.decomp import DECOMP
-from ..layers.network import Network
+# from ..layers.network import Network
+from ..layers.network_origin import Network
+
 # from layers.network_mlp import NetworkMLP # For ablation study with MLP-only stream
 # from layers.network_cnn import NetworkCNN # For ablation study with CNN-only stream
 from ..layers.revin import RevIN
@@ -33,8 +35,10 @@ class xPatchModel(nn.Module):
         beta = configs.beta  # smoothing factor for DEMA (Double Exponential Moving Average)
 
         self.decomp = DECOMP(self.ma_type, alpha, beta)
-        self.net = Network(seq_len, pred_len, patch_len, stride, padding_patch, configs.srs_dropout,
-                           configs.srs_hidden_size, configs.srs_alpha, configs.srs_pos)
+        # self.net = Network(seq_len, pred_len, patch_len, stride, padding_patch, configs.srs_dropout,
+        #                    configs.srs_hidden_size, configs.srs_alpha, configs.srs_pos)
+
+        self.net = Network(seq_len, pred_len, patch_len, stride, padding_patch)
         # self.net_mlp = NetworkMLP(seq_len, pred_len) # For ablation study with MLP-only stream
         # self.net_cnn = NetworkCNN(seq_len, pred_len, patch_len, stride, padding_patch) # For ablation study with CNN-only stream
 

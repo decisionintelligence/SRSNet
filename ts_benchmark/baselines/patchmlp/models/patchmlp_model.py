@@ -48,8 +48,13 @@ class PatchMLPModel(nn.Module):
         self.use_norm = configs.use_norm
         self.dropout = configs.dropout
         self.decompsition = series_decomp(13)
+        if self.seq_len > 96:
+            patch_len = [48, 24, 12, 6]
+        else:
+            patch_len = [16, 8, 4, 2]
         # Embedding
-        self.emb = SRSEmb(configs.d_model,self.seq_len,configs.srs_dropout,configs.srs_hidden_size,configs.srs_alpha,configs.srs_pos)
+        # self.emb = SRSEmb(configs.d_model,self.seq_len,configs.srs_dropout,configs.srs_hidden_size,configs.srs_alpha,configs.srs_pos)
+        self.emb = Emb(configs.seq_len, configs.d_model,patch_len=patch_len)
         self.seasonal_layers = nn.ModuleList(
             [Encoder(configs.d_model, configs.enc_in,configs.dropout) for i in range(configs.e_layers)]
         )
