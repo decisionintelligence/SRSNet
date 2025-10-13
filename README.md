@@ -4,7 +4,7 @@
 
 **This code is the official PyTorch implementation of our NIPS'25 paper: Enhancing Time Series Forecasting through Selective Representation Space: A Patch Perspective .**
 
-[![Python](https://camo.githubusercontent.com/c9dd914e89794e6d48a81ef6c73adb9d0020b01a81c1f641db9469076a2beb38/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f507974686f6e2d332e382532422d626c7565)](https://www.python.org/) [![PyTorch](https://camo.githubusercontent.com/6b292ce093bd8f16f2f03f22e3b693ec0d854150043c8102bd1e1d8d7778106c/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f5079546f7263682d322e342e312d626c7565)](https://pytorch.org/)
+[![NeurIPS](https://img.shields.io/badge/NeurIPS'25-SRSNet-orange)](https://arxiv.org/pdf/2403.20150.pdf)  [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)  [![PyTorch](https://img.shields.io/badge/PyTorch-2.4.1-blue)](https://pytorch.org/)  ![Stars](https://img.shields.io/github/stars/decisionintelligence/SRSNet) 
 
 If you find this project helpful, please don't forget to give it a ⭐ Star to show your support. Thank you!
 
