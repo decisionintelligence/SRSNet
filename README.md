@@ -2,9 +2,9 @@
 
 # Enhancing Time Series Forecasting through Selective Representation Space: A Patch Perspective 
 
-**This code is the official PyTorch implementation of our NIPS'25 paper: Enhancing Time Series Forecasting through Selective Representation Space: A Patch Perspective .**
+**This code is the official PyTorch implementation of our NIPS'25 paper: [Enhancing Time Series Forecasting through Selective Representation Space: A Patch Perspective](https://arxiv.org/pdf/2510.14510).**
 
-[![NeurIPS](https://img.shields.io/badge/NeurIPS'25-SRSNet-orange)](https://github.com/decisionintelligence/SRSNet)  [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)  [![PyTorch](https://img.shields.io/badge/PyTorch-2.4.1-blue)](https://pytorch.org/)  ![Stars](https://img.shields.io/github/stars/decisionintelligence/SRSNet) 
+[![NeurIPS](https://img.shields.io/badge/NeurIPS'25-SRSNet-orange)](https://arxiv.org/pdf/2510.14510)  [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)  [![PyTorch](https://img.shields.io/badge/PyTorch-2.4.1-blue)](https://pytorch.org/)  ![Stars](https://img.shields.io/github/stars/decisionintelligence/SRSNet) 
 
 If you find this project helpful, please don't forget to give it a ⭐ Star to show your support. Thank you!
 
@@ -13,7 +13,7 @@ If you find this project helpful, please don't forget to give it a ⭐ Star to s
 
 ## Introduction
 
-In this paper, we pioneer the exploration of consctructing a selective represenation space to flexibly include the information beneficial for forecasting. Specifically, we propose the **Selective Representation Space (SRS)** module, which utilizes the learnable Selective Patching and Dynamic Reassembly techniques to adaptively select and shuffle the patches from the contextual time series, aiming at fully exploiting the information of contextual time series to enhance the forecasting performance of patch-based models. To demonstrate the effectiveness of SRS module, we propose a simple yet effective **SRSNet** consisting of SRS and an MLP head, which achieves state-of-the-art performance on real-world datasets from multiple domains. 
+In this paper, we pioneer the exploration of constructing a selective representation space to flexibly include the information beneficial for forecasting. Specifically, we propose the **Selective Representation Space (SRS)** module, which utilizes the learnable Selective Patching and Dynamic Reassembly techniques to adaptively select and shuffle the patches from the contextual time series, aiming at fully exploiting the information of contextual time series to enhance the forecasting performance of patch-based models. To demonstrate the effectiveness of SRS module, we propose a simple yet effective **SRSNet** consisting of SRS and an MLP head, which achieves state-of-the-art performance on real-world datasets from multiple domains. 
 
 <div align="center">
 <img alt="Logo" src="figures/overview.png" width="100%"/>
