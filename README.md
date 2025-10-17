@@ -1,8 +1,8 @@
 
 
-# Enhancing Time Series Forecasting through Selective Representation Space: A Patch Perspective 
+# Enhancing Time Series Forecasting through Selective Representation Spaces: A Patch Perspective 
 
-**This code is the official PyTorch implementation of our NIPS'25 paper: [Enhancing Time Series Forecasting through Selective Representation Space: A Patch Perspective](https://arxiv.org/pdf/2510.14510).**
+**This code is the official PyTorch implementation of our NIPS'25 paper: [Enhancing Time Series Forecasting through Selective Representation Spaces: A Patch Perspective](https://arxiv.org/pdf/2510.14510).**
 
 [![NeurIPS](https://img.shields.io/badge/NeurIPS'25-SRSNet-orange)](https://arxiv.org/pdf/2510.14510)  [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)  [![PyTorch](https://img.shields.io/badge/PyTorch-2.4.1-blue)](https://pytorch.org/)  ![Stars](https://img.shields.io/github/stars/decisionintelligence/SRSNet) 
 
