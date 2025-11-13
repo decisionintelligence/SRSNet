@@ -2,13 +2,15 @@
 
 # Enhancing Time Series Forecasting through Selective Representation Spaces: A Patch Perspective 
 
-**This code is the official PyTorch implementation of our NIPS'25 paper: [Enhancing Time Series Forecasting through Selective Representation Spaces: A Patch Perspective](https://arxiv.org/pdf/2510.14510).**
+**This code is the official PyTorch implementation of our paper: [Enhancing Time Series Forecasting through Selective Representation Spaces: A Patch Perspective](https://arxiv.org/pdf/2510.14510).**
 
 [![NeurIPS](https://img.shields.io/badge/NeurIPS'25-SRSNet-orange)](https://arxiv.org/pdf/2510.14510)  [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)  [![PyTorch](https://img.shields.io/badge/PyTorch-2.4.1-blue)](https://pytorch.org/)  ![Stars](https://img.shields.io/github/stars/decisionintelligence/SRSNet) 
 
 If you find this project helpful, please don't forget to give it a ⭐ Star to show your support. Thank you!
 
 🚩 News (2025.9) Our paper has been accepted as a **Spotlight** poster in NeurIPS 2025.
+
+🚩 News (2025.11) Our paper is unfairly desk rejected by the SPC of NeurIPS 2025 without any evidence provided. We sincerely remind all contributors to carefully check the **"Dual Submission"** policies of top AI conferences and pay attention to such subjective descriptions as **"substantial similarity"** and **"thinly slicing"**. Under such subjective criterions, if your papers focus on the same topic and are parallelly submitted, they are at risk of being judged as dual submissions by some Program Chairs not majoring in your domains.
 
 
 ## Introduction
