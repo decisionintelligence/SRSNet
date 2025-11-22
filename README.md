@@ -10,7 +10,7 @@ If you find this project helpful, please don't forget to give it a ⭐ Star to s
 
 🚩 News (2025.9) Our paper has been accepted as a **Spotlight** poster in NeurIPS 2025.
 
-🚩 News (2025.11) Our paper is unfairly desk rejected by the SPC of NeurIPS 2025 without any evidence provided. We sincerely remind all contributors to carefully check the **"Dual Submission"** policies of top AI conferences and pay attention to such subjective descriptions as **"substantial similarity"** and **"thinly slicing"**. Under such subjective criterions, if your papers focus on the same topic and are parallelly submitted, they are at risk of being judged as dual submissions by some Program Chairs not majoring in your domains.
+🚩 News (2025.11) Our paper is unfairly desk rejected by the SPC of NeurIPS 2025 without any evidence provided. We sincerely remind all contributors to carefully check the **"Dual Submission"** policies of top AI conferences and pay attention to such subjective descriptions as **"substantial similarity"** and **"thinly slicing"**. Under such subjective criterions, if your papers (shared authors) focus on the same topic and are parallelly submitted, they are at risk of being judged as dual submissions by some Program Chairs not majoring in your domains.
 
 
 ## Introduction
